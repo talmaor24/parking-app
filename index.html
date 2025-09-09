@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול חניות</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Heebo', sans-serif;
+        }
+
+        .nav-btn {
+            white-space: nowrap;
+        }
+
+        .employee-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .employee-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <div id="root"></div>
+
+    <!-- React and ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialEmployeesData = [
+            { id: '1', name: 'סימה', role: 'employee', status: null },
+            { id: '2', name: 'חני', role: 'special', present: true },
+            { id: '3', name: 'ליזה', role: 'employee', status: null },
+            { id: '4', name: 'שיר', role: 'employee', status: null },
+            { id: '5', name: 'הילה', role: 'employee', status: null },
+            { id: '6', name: 'דוד', role: 'special', present: true },
+            { id: '7', name: 'שרון', role: 'special', present: true },
+            { id: '8', name: 'אייל', role: 'special', present: true },
+            { id: '9', name: 'יקי', role: 'special', present: true },
+        ];
+
+        const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
+        const totalSpots = 10;
+
+        const CarIcon = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="10" width="18" height="8" rx="2" ry="2"></rect>
+                <path d="M7 18v2h10v-2"></path>
+                <path d="M5 10v-3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"></path>
+            </svg>
+        );
+
+        function AvailabilityPage({ employees, setEmployees }) {
+            const handleStatusChange = (empId, statusValue) => {
+                setEmployees(prev =>
+                    prev.map(emp => emp.id === empId ? { ...emp, status: statusValue } : emp)
+                );
+            };
+
+            const handlePresenceToggle = (empId, isPresent) => {
+                setEmployees(prev =>
+                    prev.map(emp => emp.id === empId ? { ...emp, present: isPresent } : emp)
+                );
+            };
+
+            return (
+                <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                    <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">זמינות חניות</h2>
+                    <ul className="employee-list grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {employees.map(emp => (
+                            <li key={emp.id} className="employee-card bg-white shadow-xl rounded-lg p-5 flex flex-col items-center text-center transition-all duration-300 transform hover:scale-105">
+                                <div className="employee-name text-2xl font-semibold text-gray-700">{emp.name}</div>
+                                {emp.role === 'special' ? (
+                                    <div className="presence-toggle mt-3 w-full">
+                                        <button
+                                            className={`presence-btn w-full py-2 px-4 rounded-lg font-medium transition-colors transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 ${emp.present ? "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500" : "bg-green-500 hover:bg-green-600 text-white focus:ring-green-500"}`}
+                                            onClick={() => handlePresenceToggle(emp.id, !emp.present)}
+                                        >
+                                            <div className="flex items-center justify-center">
+                                                <span className="ml-2">{emp.present ? '🚗' : '🟢'}</span>
+                                                {emp.present ? 'נמצא – חניה תפוסה' : 'לא נמצא – שחרר חניה'}
+                                            </div>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="question mt-3 text-lg font-medium text-gray-600">האם את/ה חונה בחניון?</div>
+                                        <div className="radio-group flex justify-center space-x-6 mt-2">
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name={`status-${emp.id}`}
+                                                    checked={emp.status === true}
+                                                    onChange={() => handleStatusChange(emp.id, true)}
+                                                    className="form-radio text-blue-600 h-5 w-5"
+                                                />
+                                                <span className="mr-2 text-gray-700">כן</span>
+                                            </label>
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name={`status-${emp.id}`}
+                                                    checked={emp.status === false}
+                                                    onChange={() => handleStatusChange(emp.id, false)}
+                                                    className="form-radio text-blue-600 h-5 w-5"
+                                                />
+                                                <span className="mr-2 text-gray-700">לא</span>
+                                            </label>
+                                        </div>
+                                    </>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        function WeeklySchedulePage({ employees }) {
+            const [schedule, setSchedule] = useState({});
+            const [saveMessage, setSaveMessage] = useState(null);
+            const [isEditing, setIsEditing] = useState(true);
+
+            const handleSelectChange = (day, empId) => {
+                setSchedule((prev) => ({ ...prev, [day]: empId }));
+                if (saveMessage) setSaveMessage(null);
+            };
+
+            const handleReset = () => {
+                setSchedule({});
+                setIsEditing(true);
+                if (saveMessage) setSaveMessage(null);
+            };
+
+            const handleSave = () => {
+                console.log("Saving schedule:", schedule);
+                setSaveMessage("הלוז נשמר בהצלחה! ✅");
+                setIsEditing(false);
+                setTimeout(() => setSaveMessage(null), 3000);
+            };
+
+            const handleEdit = () => {
+                setIsEditing(true);
+                if (saveMessage) setSaveMessage(null);
+            };
+
+            return (
+                <div className="weekly-schedule-calendar p-6 bg-gray-50 rounded-xl shadow-inner mt-8 mx-auto w-full max-w-4xl">
+                    <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">לוז שבועי לחניות</h2>
+                    <div className="overflow-x-auto">
+                        <table className="calendar-table w-full border-collapse rounded-lg overflow-hidden">
+                            <thead>
+                                <tr className="bg-gray-200 text-gray-700">
+                                    {days.map((day) => (
+                                        <th key={day} className="py-3 px-2 sm:px-4 text-center border-r last:border-r-0 border-gray-300">{day}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {days.map((day) => (
+                                        <td key={day} className="py-4 px-2 sm:px-4 text-center border-r last:border-r-0 border-gray-300 bg-white">
+                                            <select
+                                                value={schedule[day] || ""}
+                                                onChange={(e) => handleSelectChange(day, e.target.value)}
+                                                className="w-full bg-gray-50 border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200"
+                                                disabled={!isEditing}
+                                            >
+                                                <option value="">בחר עובד</option>
+                                                {employees.map((emp) => (
+                                                    <option key={emp.id} value={emp.id}>
+                                                        {emp.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="calendar-actions flex justify-center flex-wrap space-x-2 sm:space-x-4 mt-6">
+                        {isEditing ? (
+                            <>
+                                <button className="save-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition-colors transform hover:scale-105" onClick={handleSave}>שמור</button>
+                                <button className="reset-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors transform hover:scale-105 mt-2 sm:mt-0" onClick={handleReset}>
+                                    אפס לוז
+                                </button>
+                            </>
+                        ) : (
+                            <button className="edit-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors transform hover:scale-105" onClick={handleEdit}>ערוך</button>
+                        )}
+                    </div>
+                    {saveMessage && (
+                        <div className="mt-4 text-center text-green-600 font-semibold transition-opacity duration-500 fade-out">
+                            {saveMessage}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function ParkingSketchPage({ employees }) {
+            const occupiedEmployees = employees.filter(emp => emp.role === "special" ? emp.present : emp.status === true);
+            const occupiedSpotsCount = occupiedEmployees.length;
+
+            const spots = [];
+            occupiedEmployees.forEach(emp => spots.push({ occupied: true, employee: emp }));
+            const freeSpotsCount = totalSpots - occupiedSpotsCount;
+            for (let i = 0; i < freeSpotsCount; i++) {
+                spots.push({ occupied: false, employee: null });
+            }
+
+            return (
+                <div className="p-6">
+                    <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">מפת חניון</h2>
+                    <p className="text-center text-lg text-gray-600 mb-8">
+                        חניות תפוסות: <span className="font-bold text-red-500">{occupiedSpotsCount}</span> מתוך <span className="font-bold">{totalSpots}</span>
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 justify-items-center">
+                        {spots.map((spot, index) => (
+                            <div
+                                key={index}
+                                className={`
+                                w-full h-32 flex flex-col items-center justify-center relative
+                                rounded-xl shadow-md transition-all duration-300 transform hover:scale-105
+                                ${spot.occupied ? "bg-red-500 text-white" : "bg-green-500 text-white"}
+                                `}
+                            >
+                                <span className="absolute top-2 right-2 text-sm font-semibold">
+                                    #{index + 1}
+                                </span>
+                                {spot.occupied ? (
+                                    <>
+                                        <CarIcon />
+                                        <div className="text-base font-semibold text-center mt-2">{spot.employee.name}</div>
+                                    </>
+                                ) : (
+                                    <div className="text-base font-semibold">פנוי</div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [page, setPage] = useState('availability');
+            const [employees, setEmployees] = useState(initialEmployeesData);
+
+            return (
+                <div className="bg-gray-100 min-h-screen font-sans">
+                    <nav className="bg-white shadow-lg p-4 flex flex-wrap justify-center space-x-2 sm:space-x-4 mb-8">
+                        <button
+                            onClick={() => setPage('availability')}
+                            className={`nav-btn px-4 py-2 text-sm sm:text-lg font-medium rounded-full transition-all duration-300 ${page === "availability" ? "bg-blue-600 text-white shadow-lg" : "text-gray-600 hover:bg-gray-200"}`}
+                        >
+                            זמינות חניות
+                        </button>
+                        <button
+                            onClick={() => setPage('schedule')}
+                            className={`nav-btn px-4 py-2 text-sm sm:text-lg font-medium rounded-full transition-all duration-300 ${page === "schedule" ? "bg-blue-600 text-white shadow-lg" : "text-gray-600 hover:bg-gray-200"}`}
+                        >
+                            לוז שבועי
+                        </button>
+                        <button
+                            onClick={() => setPage('parkingSketch')}
+                            className={`nav-btn px-4 py-2 text-sm sm:text-lg font-medium rounded-full transition-all duration-300 ${page === "parkingSketch" ? "bg-blue-600 text-white shadow-lg" : "text-gray-600 hover:bg-gray-200"}`}
+                        >
+                            מפת חניון
+                        </button>
+                    </nav>
+
+                    <div className="w-full max-w-6xl mx-auto px-4">
+                        {page === 'availability' && (
+                            <AvailabilityPage employees={employees} setEmployees={setEmployees} />
+                        )}
+                        {page === 'schedule' && (
+                            <WeeklySchedulePage employees={employees} />
+                        )}
+                        {page === 'parkingSketch' && (
+                            <ParkingSketchPage employees={employees} />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
